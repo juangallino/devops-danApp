@@ -1,0 +1,8 @@
+http://dan-gateway:8080/productos
+http://dan-gateway:8080/pedidos
+http://dan-gateway:8080/usuarios
+
+
+        - "ZUUL_ROUTES_MSUSUARIOS_URL=http://dan-usuarios:8080/"
+        - "ZUUL_ROUTES_MSPRODUCTOS_URL=http://dan-stock:8080/"
+        - "ZUUL_ROUTES_MSPEDIDOS_URL=http://dan-pedido:8080/"

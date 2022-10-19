@@ -1,0 +1,127 @@
+version: "3.9"  # optional since v1.27.0 # con docker host.docker.internal
+services: 
+  pedidos:
+    container_name: dan-pedido
+    image: dan/ms-pedido:0.0.1-SNAPSHOT
+    environment:
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SERVER_PORT=8080"
+      - "SPRING_DATASOURCE_URL=jdbc:mysql://dan-app-containers_mysql_1:3306/TP-DAN"
+      - "SPRING_DATASOURCE_PASSWORD=some_password"
+      - "SPRING_ARTEMIS_HOST=dan-app-containers_artemis_1"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://dan-eureka:8080/eureka/"
+      - "MANAGEMENT_METRICS_TAGS_APPLICATION=MS-Pedido-MONITOR"
+    ports:
+      - 7001:8080
+    networks:
+      - app  
+  pedidos02:
+    container_name: dan-pedido02
+    image: dan/ms-pedido:0.0.1-SNAPSHOT
+    environment:
+      - "SPRING_PROFILES_ACTIVE=docker"
+      - "SERVER_PORT=8080"
+      - "SPRING_DATASOURCE_URL=jdbc:mysql://dan-app-containers_mysql_1:3306/TP-DAN"
+      - "SPRING_DATASOURCE_PASSWORD=some_password"
+      - "SPRING_ARTEMIS_HOST=dan-app-containers_artemis_1"
+      - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://dan-eureka:8080/eureka/"
+      - "MANAGEMENT_METRICS_TAGS_APPLICATION=MS-PEDIDO02-MONITOR"
+    ports:
+      - 7002:8080
+    networks:
+      - app     
+  stock:
+      container_name: dan-stock
+      image: dan/ms-stock:0.0.1-SNAPSHOT
+      environment:
+        - "SPRING_PROFILES_ACTIVE=docker"
+        - "SERVER_PORT=8080"
+        - "SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/TP-DAN"
+        - "SPRING_DATASOURCE_PASSWORD=some_password"
+        - "SPRING_ARTEMIS_HOST=dan-app-containers_artemis_1"
+        - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://dan-eureka:8080/eureka/"      
+        - "MANAGEMENT_METRICS_TAGS_APPLICATION=MS-STOCK-MONITOR"  
+      ports:
+      - 7011:8080
+      networks:
+      - app 
+  stock02:
+      container_name: dan-stock02
+      image: dan/ms-stock:0.0.1-SNAPSHOT
+      environment:
+        - "SPRING_PROFILES_ACTIVE=docker"
+        - "SERVER_PORT=8080"
+        - "SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/TP-DAN"
+        - "SPRING_DATASOURCE_PASSWORD=some_password"
+        - "SPRING_ARTEMIS_HOST=dan-app-containers_artemis_1"
+        - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://dan-eureka:8080/eureka/"  
+        - "MANAGEMENT_METRICS_TAGS_APPLICATION=MS-STOCK02-MONITOR"      
+      ports:
+      - 7012:8080
+      networks:
+      - app 
+  
+  usuarios:
+      container_name: dan-usuarios
+      image: dan/ms-usuarios:0.0.1-SNAPSHOT     
+      environment:
+        - "SPRING_PROFILES_ACTIVE=docker"
+        - "SERVER_PORT=8080"
+        - "SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/TP-DAN"
+        - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://dan-eureka:8080/eureka/"
+        - "RIBBON_EUREKA_ENABLED=TRUE"
+        - "MANAGEMENT_METRICS_TAGS_APPLICATION=MS-USUARIOS-MONITOR"
+      ports:
+      - 7021:8080
+      networks:
+      - app   
+  usuarios2:
+      container_name: dan-usuarios02
+      image: dan/ms-usuarios:0.0.1-SNAPSHOT      
+      environment:
+        - "SPRING_PROFILES_ACTIVE=docker"
+        - "SERVER_PORT=8080"
+        - "SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/TP-DAN"
+        - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://dan-eureka:8080/eureka/"
+        - "RIBBON_EUREKA_ENABLED=TRUE"
+        - "MANAGEMENT_METRICS_TAGS_APPLICATION=MS-USUARIOS02-MONITOR"
+      ports:
+      - 7022:8080
+      networks:
+      - app 
+  gateway:
+      container_name: dan-gateway
+      image: dan/gateway:0.0.1-SNAPSHOT
+      ports:
+        - "1000:8080"
+      environment:
+        - "SPRING_PROFILES_ACTIVE=docker"
+        - "SERVER_PORT=8080"
+        - "SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/TP-DAN"
+        - "EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://dan-eureka:8080/eureka/"
+        - "ZUUL_ROUTES_MSUSUARIOS_URL=http://dan-usuarios:8080/"
+        - "ZUUL_ROUTES_MSPRODUCTOS_URL=http://dan-stock:8080/"
+        - "ZUUL_ROUTES_MSPEDIDOS_URL=http://dan-pedido:8080/"
+        - "RIBBON_EUREKA_ENABLED=TRUE"
+        - "EUREKA_INSTANCE_INSTANCE-ID=${SPRING_APPLICATION_NAME}"
+        - "EUREKA_INSTANCE_LEASE-RENEWAL-INTERVAL-IN-SECONDS=3"
+        - "MANAGEMENT_METRICS_TAGS_APPLICATION=API-GATEWAY-MONITOR"
+      ports:
+      - 1000:8080
+      networks:
+      - app  
+  eureka:
+      container_name: dan-eureka
+      image: dan/eureka:0.0.1-SNAPSHOT
+      ports:
+        - "8761:8080"
+      environment:
+        - "SPRING_PROFILES_ACTIVE=docker"
+        - "SERVER_PORT=8080"
+      networks:
+        - app         
+networks:
+  app:
+    external: true
+    name: dan-docker_app
+    
